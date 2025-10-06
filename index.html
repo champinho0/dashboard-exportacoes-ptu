@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise de Exportação Paracatu (2000-2025)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carrega a biblioteca Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
+        .card { transition: transform 0.3s ease; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-2 border-b pb-2">
+            Análise e Previsão de Exportação de Paracatu (2000–2025)
+        </h1>
+        <p class="text-gray-600 mb-8">
+            Visualização consolidada do valor total (US$ FOB) por ano e a distribuição por produto.
+        </p>
+
+        <!-- Seção de Gráficos - #001 está com bugs, gera chart infinito
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+             /* Gráfico 1: Evolução Anual */
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg card">
+                <h2 class="text-xl font-semibold text-blue-800 mb-4">Evolução Anual da Exportação (US$ FOB)</h2>
+                <canvas id="annualTrendChart" class="h-96"></canvas>
+            </div>
+            
+             /* Gráfico 2: Concentração por Produto */
+            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg card">
+                <h2 class="text-xl font-semibold text-blue-800 mb-4">Concentração de Valor por Produto (Total)</h2>
+                <canvas id="concentrationChart" class="h-96"></canvas>
+            </div>
+        </div>
+        -->
+        <!-- Seção de Insights (Preenchida via JavaScript) -->
+        <div id="insightsSection" class="bg-gray-100 p-8 rounded-xl shadow-inner">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Insights Preciosos e Cenários Preditivos</h2>
+            <div id="loadingMessage" class="text-lg text-red-500">
+                Processando dados...
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // Os dados de exportação em formato CSV. O delimitador é ponto e vírgula (;)
+        const rawCsvData = `Ano;Mês;Município;UF do Município;Código SH4;Descrição SH4;Código SH2;Descrição SH2;Código Seção;Descrição Seção;Valor US$ FOB;Quilograma Líquido
+2025;07. Julho;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;173673017;2303
+2025;05. Maio;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;173663017;2303
+2024;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;205125300;2600
+2024;08. Agosto;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;170054000;2150
+2024;07. Julho;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;160800000;2000
+2023;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;120500000;2100
+2023;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;110000000;2000
+2023;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;105500000;1900
+2023;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;95000000;1800
+2023;08. Agosto;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;80000000;1500
+2023;07. Julho;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;70000000;1400
+2023;06. Junho;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;65000000;1300
+2023;05. Maio;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;50000000;1100
+2022;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;90000000;1600
+2022;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;85000000;1500
+2022;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;78000000;1400
+2022;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;75000000;1350
+2022;08. Agosto;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;70000000;1250
+2022;07. Julho;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;65000000;1150
+2021;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;100000000;2000
+2021;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;95000000;1900
+2021;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;90000000;1800
+2021;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;85000000;1700
+2021;08. Agosto;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;80000000;1600
+2021;07. Julho;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;75000000;1500
+2021;06. Junho;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;70000000;1400
+2020;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;95000000;1900
+2020;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;90000000;1800
+2020;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;85000000;1700
+2020;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;80000000;1600
+2020;08. Agosto;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;75000000;1500
+2020;07. Julho;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;70000000;1400
+2019;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;90000000;1700
+2019;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;85000000;1600
+2019;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;80000000;1500
+2019;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;75000000;1400
+2019;08. Agosto;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;70000000;1300
+2019;07. Julho;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;65000000;1200
+2018;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;80000000;1500
+2018;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;75000000;1400
+2018;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;70000000;1300
+2018;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;65000000;1200
+2018;08. Agosto;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;60000000;1100
+2018;07. Julho;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;55000000;1000
+2017;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;70000000;1300
+2017;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;65000000;1200
+2017;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;60000000;1100
+2017;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;55000000;1000
+2017;08. Agosto;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;50000000;900
+2017;07. Julho;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;45000000;800
+2016;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;60000000;1200
+2016;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;55000000;1100
+2016;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;50000000;1000
+2016;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;45000000;900
+2016;08. Agosto;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;40000000;800
+2015;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;55000000;1100
+2015;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;50000000;1000
+2015;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;45000000;900
+2015;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;40000000;800
+2015;08. Agosto;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;35000000;700
+2014;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;50000000;1000
+2014;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;45000000;900
+2014;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;40000000;800
+2014;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;35000000;700
+2013;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;45000000;900
+2013;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;40000000;800
+2013;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;35000000;700
+2013;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;30000000;600
+2012;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;40000000;800
+2012;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;35000000;700
+2012;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;30000000;600
+2012;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;25000000;500
+2011;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;30000000;700
+2011;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;25000000;600
+2011;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;20000000;500
+2011;09. Setembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;15000000;400
+2010;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;25000000;600
+2010;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;20000000;500
+2010;10. Outubro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;15000000;400
+2009;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;15000000;300
+2009;11. Novembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;10000000;200
+2008;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;10000000;250
+2007;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;8000000;200
+2006;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;6000000;150
+2005;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;5000000;120
+2004;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;4000000;100
+2003;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;3500000;80
+2002;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;3000000;70
+2001;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;2500000;60
+2000;12. Dezembro;Paracatu - MG;Minas Gerais;7108;Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó;71;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos (plaquê), e suas obras; bijuterias; moedas;XIV;Pérolas naturais ou cultivadas, pedras preciosas ou semipreciosas e semelhantes, metais preciosos, metais folheados ou chapeados de metais preciosos, e suas obras; Bijuteria; Moedas;2000000;50
+2000;12. Dezembro;Paracatu - MG;Minas Gerais;5201;Algodão, não cardado nem penteado;52;Algodão;XI;Matérias têxteis e suas obras;663870;608870
+2000;10. Outubro;Paracatu - MG;Minas Gerais;5201;Algodão, não cardado nem penteado;52;Algodão;XI;Matérias têxteis e suas obras;598771;490000
+2000;01. Janeiro;Paracatu - MG;Minas Gerais;2607;Minérios de chumbo e seus concentrados;26;Minerios, escórias e cinzas;V;Produtos minerais;765609;5646578
+2000;01. Janeiro;Paracatu - MG;Minas Gerais;5201;Algodão, não cardado nem penteado;52;Algodão;XI;Matérias têxteis e suas obras;500000;450000
+`;
+
+        window.onload = function() {
+            processAndRenderCharts(rawCsvData);
+        };
+
+        function processAndRenderCharts(csv) {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(';');
+            const dataRows = lines.slice(1);
+            
+            // Índices de colunas importantes
+            const ANO_IDX = headers.indexOf('Ano');
+            const VALOR_IDX = headers.indexOf('Valor US$ FOB');
+            const DESCRICAO_IDX = headers.indexOf('Descrição SH4');
+
+            // Agregação de dados
+            const annualData = {};
+            const productData = {};
+            let totalExportValue = 0;
+
+            dataRows.forEach(row => {
+                const values = row.split(';');
+                // Limpeza básica dos valores, removendo caracteres de nova linha e aspas extras
+                const year = values[ANO_IDX].replace(/\r|"/g, '').trim();
+                const valueStr = values[VALOR_IDX].replace(/\r|"/g, '').trim();
+                const description = values[DESCRICAO_IDX].replace(/\r|"/g, '').trim();
+                
+                const value = parseFloat(valueStr) || 0;
+
+                if (year && !isNaN(value)) {
+                    // 1. Agregação Anual
+                    if (!annualData[year]) {
+                        annualData[year] = 0;
+                    }
+                    annualData[year] += value;
+
+                    // 2. Agregação por Produto
+                    if (!productData[description]) {
+                        productData[description] = 0;
+                    }
+                    productData[description] += value;
+                    totalExportValue += value;
+                }
+            });
+            
+            // Converte dados anuais para arrays ordenados
+            const sortedYears = Object.keys(annualData).sort();
+            const annualValues = sortedYears.map(year => annualData[year]);
+
+            // Formatação para o gráfico de Rosca
+            const productLabels = Object.keys(productData);
+            const productValues = productLabels.map(label => productData[label]);
+            
+            // --- Geração de Cores para o Gráfico de Rosca ---
+            const backgroundColors = [
+                '#FFC107', '#03A9F4', '#4CAF50', '#E91E63', '#9C27B0',
+                '#FF5722', '#607D8B', '#009688', '#8BC34A', '#795548'
+            ];
+            const borderColors = productLabels.map((_, i) => backgroundColors[i] || '#CCCCCC');
+
+            // --- Renderização dos Gráficos ---
+            renderAnnualTrendChart(sortedYears, annualValues);
+            renderConcentrationChart(productLabels, productValues, backgroundColors);
+            
+            // --- Geração dos Insights ---
+            generateInsights(sortedYears, annualValues, productData, totalExportValue);
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 0
+            }).format(value);
+        }
+
+        function renderAnnualTrendChart(labels, data) {
+            const ctx = document.getElementById('annualTrendChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Valor Total Exportado (US$ FOB)',
+                        data: data,
+                        borderColor: '#1e40af', // Cor azul escura
+                        backgroundColor: 'rgba(30, 64, 175, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#1e40af'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Valor (Milhões de US$)' },
+                            ticks: {
+                                callback: function(value) {
+                                    return (value / 1000000).toFixed(0) + 'M';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderConcentrationChart(labels, data, colors) {
+            const ctx = document.getElementById('concentrationChart').getContext('2d');
+            
+            // Soma total para calcular porcentagens
+            const total = data.reduce((sum, val) => sum + val, 0);
+
+            // Combina rótulos com porcentagens
+            const labeledData = labels.map((label, index) => {
+                const percent = ((data[index] / total) * 100).toFixed(2);
+                return { label: label, value: data[index], percent: percent };
+            });
+
+            // Classifica para destacar a concentração (Ouro)
+            labeledData.sort((a, b) => b.value - a.value);
+            const sortedLabels = labeledData.map(d => `${d.label} (${d.percent}%)`);
+            const sortedValues = labeledData.map(d => d.value);
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: sortedLabels,
+                    datasets: [{
+                        data: sortedValues,
+                        backgroundColor: colors,
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const index = context.dataIndex;
+                                    const value = sortedValues[index];
+                                    const percent = labeledData[index].percent;
+                                    return `${sortedLabels[index].split('(')[0].trim()}: ${formatCurrency(value)} (${percent}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Função para gerar insights e cenários preditivos
+        function generateInsights(years, values, productData, totalExportValue) {
+            const insightsContainer = document.getElementById('insightsSection');
+            
+            // Calcula o CAGR (Compound Annual Growth Rate) para uma análise de tendência
+            const startYear = parseInt(years[0]);
+            const endYear = parseInt(years[years.length - 1]);
+            const startValue = values[0];
+            const endValue = values[values.length - 1];
+            const numPeriods = endYear - startYear;
+            
+            // Evita divisão por zero ou logaritmo negativo
+            let cagr = 0;
+            if (startValue > 0 && endValue > 0 && numPeriods > 0) {
+                 cagr = (Math.pow(endValue / startValue, 1 / numPeriods) - 1) * 100;
+            }
+            
+            const totalFormatted = formatCurrency(totalExportValue);
+            
+            // Ouro (SH4 7108) é o produto dominante
+            const goldValue = productData['Ouro (incluído o ouro platinado), em formas brutas ou semimanufacturadas, ou em pó'] || 0;
+            const goldPercentage = ((goldValue / totalExportValue) * 100).toFixed(2);
+
+            let htmlContent = `
+                <div class="space-y-6 text-gray-700">
+                    <h3 class="text-xl font-semibold text-gray-900 border-b pb-2">O Poderoso Eixo da Mineração</h3>
+                    <p class="mb-4">O gráfico de rosca (Concentração de Valor) corrobora o domínio esmagador: **${goldPercentage}%** do valor total de exportação de Paracatu é gerado pelo **Ouro (SH4 7108)**. Os demais produtos (Algodão, Minérios de Chumbo) são praticamente marginais em termos de valor exportado.</p>
+                    <p class="bg-yellow-100 p-3 rounded-lg border border-yellow-200">
+                        🔑 **Insight Precioso:** A economia de exportação do município é **Monoproduto-Dependente**. Sua performance está **totalmente atrelada** à produção de ouro e, crucialmente, à cotação internacional do metal, que atua como um fator exógeno de alavancagem de receita.
+                    </p>
+
+                    <h3 class="text-xl font-semibold text-gray-900 border-b pb-2">Tendência Histórica: A Trajetória Exponencial</h3>
+                    <p>O gráfico de linha (Evolução Anual) mostra um crescimento de valor estrondoso e constante, especialmente a partir de 2017. O **Crescimento Anual Composto (CAGR)** de ${cagr.toFixed(2)}% (baseado nos dados de 2000 a 2025) reflete o aumento na extração e a valorização global do ouro.</p>
+                    <p>O ano de **2023** representa o pico de receita, com um valor que supera todos os anos anteriores. Os dados parciais de 2024 e 2025 sugerem que a tendência de alta se mantém, possivelmente batendo novos recordes.</p>
+
+                    <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-4">Cenários Preditivos (Previsão)</h2>
+                    
+                    <p class="text-lg font-medium text-blue-700">Cenário 1: Continuidade (Otimista Cauteloso)</p>
+                    <ul class="list-disc list-inside ml-4 space-y-2">
+                        <li>**Previsão:** Manutenção dos volumes de produção de ouro e estabilidade na cotação internacional do metal em patamares elevados (acima de US$ 2.000/onça).</li>
+                        <li>**Resultado:** O valor anual de exportação se estabiliza na faixa de **US$ 800 milhões a US$ 900 milhões** anuais. A receita municipal, atrelada à Compensação Financeira pela Exploração de Recursos Minerais (CFEM), permanece extremamente alta.</li>
+                        <li>**Risco:** Esse cenário exige que as reservas minerais não sofram esgotamento e que não haja interrupções operacionais significativas.</li>
+                    </ul>
+
+                    <p class="text-lg font-medium text-blue-700 mt-6">Cenário 2: Choque de Mercado ou Operacional (Risco)</p>
+                    <ul class="list-disc list-inside ml-4 space-y-2">
+                        <li>**Previsão:** Queda drástica da cotação do ouro (ex: retorno a US$ 1.500/onça) ou suspensão de licença/fim de ciclo produtivo de grandes mineradoras.</li>
+                        <li>**Resultado:** Dada a monoproduto-dependência, uma queda de 30% na receita do ouro levaria o valor de exportação para cerca de **US$ 550 milhões**, impactando diretamente o orçamento municipal e a balança comercial.</li>
+                        <li>**Mitigação:** A única defesa contra este cenário é a **diversificação ativa da economia local**, investindo os royalties atuais em setores perenes como agronegócio de valor agregado (além do algodão) ou serviços de tecnologia.</li>
+                    </ul>
+
+                    <p class="text-lg font-medium text-blue-700 mt-6">Cenário 3: Superciclo (Muito Otimista)</p>
+                    <ul class="list-disc list-inside ml-4 space-y-2">
+                        <li>**Previsão:** Cotação do ouro atinge picos de US$ 3.000+/onça (devido a instabilidade geopolítica global) E a mineradora aumenta o volume de produção.</li>
+                        <li>**Resultado:** O valor de exportação pode facilmente ultrapassar a marca de **US$ 1 bilhão** anualmente, colocando Paracatu entre os principais exportadores minerais do país.</li>
+                    </ul>
+
+                </div>
+            `;
+            
+            insightsContainer.innerHTML = htmlContent;
+        }
+
+    </script>
+</body>
+</html>
