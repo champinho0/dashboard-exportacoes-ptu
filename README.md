@@ -1,7 +1,7 @@
 # dashboard-exportacoes-ptu
-Exportações realizadas em Paracatu no último neste século.
+Exportações realizadas em Paracatu neste século.
 
-Este código é uma página HTML interativa que apresenta uma análise visual e preditiva das exportações do município de Paracatu (MG) entre 2000 e 2025, usando dados reais em formato CSV embutido no próprio código.
+Este código é uma página HTML interativa que apresenta uma análise visual e preditiva das exportações do município de Paracatu (MG) entre 2000 e agosto de 2025, usando dados reais em formato CSV embutido no próprio código.
 
 *Principais pontos do contexto*
 Visualização de Dados: utiliza Chart.js para exibir dois gráficos: Um gráfico de linha mostrando a evolução anual do valor total exportado (US$ FOB). 
